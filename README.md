@@ -323,6 +323,166 @@ ss -ltnp | grep -E '(:5900|:6080|:80)'
 ```
 
 ---
+---
+
+## 🛰️ GPS Integration (PL2303 + NEO-6M or Similar)
+
+If your Raspberry Pi node includes a GPS receiver (e.g., NEO-6M connected via a PL2303 USB adapter), this section ensures the GPS data is properly recognized by the system and available to JS8Call.
+
+### 1. Confirm Device Detection
+
+Plug in your GPS and verify that it appears as a serial device:
+
+```bash
+lsusb
+ls /dev/ttyUSB*
+```
+
+Typical output:
+
+```
+Bus 001 Device 007: ID 067b:2303 Prolific Technology, Inc. PL2303 Serial Port
+/dev/ttyUSB2
+```
+
+This indicates the GPS UART is bridged through the Prolific PL2303 adapter and available as `/dev/ttyUSB2`.
+
+---
+
+### 2. Test Raw NMEA Output
+
+Run the following test at different baud rates until you see valid NMEA sentences (they start with `$GP`):
+
+```bash
+for rate in 4800 9600 38400 115200; do
+  echo "Testing $rate baud..."
+  sudo stty -F /dev/ttyUSB2 $rate
+  timeout 3 cat /dev/ttyUSB2 | head -5
+done
+```
+
+If you see lines like these, your GPS is working:
+
+```
+$GPGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,*47
+$GPRMC,123520,A,4807.038,N,01131.000,E,022.4,084.4,230394,003.1,W*6A
+```
+
+> 💡 Most NEO-6M GPS units default to **4800 baud**.
+
+---
+
+### 3. Configure gpsd for Persistent Use
+
+Install gpsd and clients:
+
+```bash
+sudo apt install -y gpsd gpsd-clients
+```
+
+Edit `/etc/default/gpsd`:
+
+```bash
+sudo nano /etc/default/gpsd
+```
+
+Set these options:
+
+```
+START_DAEMON="true"
+USBAUTO="false"
+DEVICES="/dev/ttyUSB2"
+GPSD_OPTIONS="-s 4800"
+```
+
+Then restart the service:
+
+```bash
+sudo systemctl enable gpsd
+sudo systemctl restart gpsd
+```
+
+Test the connection:
+
+```bash
+cgps -s
+```
+
+You should see a live display of satellites, position, and time.
+
+---
+
+### 4. Optional — Stable Device Naming
+
+Create a udev rule to always assign `/dev/gps0` to your GPS:
+
+```bash
+sudo nano /etc/udev/rules.d/99-gps.rules
+```
+
+Add this line:
+
+```
+SUBSYSTEM=="tty", ATTRS{idVendor}=="067b", ATTRS{idProduct}=="2303", SYMLINK+="gps0"
+```
+
+Reload and apply:
+
+```bash
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+```
+
+Update `/etc/default/gpsd` to use:
+
+```
+DEVICES="/dev/gps0"
+GPSD_OPTIONS="-s 4800"
+```
+
+Now the GPS will always appear as `/dev/gps0`, regardless of which USB port is used.
+
+---
+
+### 5. Optional — Use GPS as Time Source (Offline Operation)
+
+If you want the Pi to keep accurate time without Internet access, install Chrony and reference GPSD:
+
+```bash
+sudo apt install -y chrony
+sudo nano /etc/chrony/chrony.conf
+```
+
+Add:
+
+```
+refclock SHM 0 offset 0.5 delay 0.2 refid NMEA
+```
+
+Restart Chrony:
+
+```bash
+sudo systemctl restart chronyd
+```
+
+You can verify GPS time synchronization with:
+
+```bash
+chronyc sources
+```
+
+---
+
+### ✅ Summary
+
+- GPS detected as `/dev/ttyUSB2` (PL2303 bridge)
+- Running at **4800 baud**
+- Configured in gpsd for auto-start at boot
+- Accessible via `cgps -s`
+- Optional `/dev/gps0` alias for reliability
+- Optional time synchronization via Chrony
+
+This allows JS8Call and related software to obtain accurate location and time data even in the field, without relying on network connectivity.
 
 ## 🧩 Troubleshooting
 
