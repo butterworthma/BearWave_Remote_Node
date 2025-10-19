@@ -336,7 +336,7 @@ ss -ltnp | grep -E '(:5900|:6080|:80)'
 | JS8Call | [https://js8call.com](https://js8call.com) |
 | noVNC / websockify | [https://novnc.com](https://novnc.com) |
 | Openbox / Xvfb / x11vnc | Debian & Raspberry Pi OS packages |
-| Guide Author | ChatGPT (GPT-5) |
+| Guide Author | Mark Butterworth|
 
 ---
 
