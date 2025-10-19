@@ -19,6 +19,14 @@ If the Pi detects your home Wi-Fi, it joins it automatically; otherwise it creat
 | wifi-autoswitch | Toggles between Wi-Fi client and AP modes |
 | JS8Call | HF digital communications application |
 
+## 🚀 Quick Install
+
+Set up the complete **Headless JS8Call Pi Node with JS8-CLI** in one line:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/<YOUR_USERNAME>/<YOUR_REPO>/main/BearWaveNodeSetup.sh | bash
+
+
 ---
 
 ## 1. Base System
