@@ -18,7 +18,7 @@ If the Pi detects your home Wi-Fi, it joins it automatically; otherwise it creat
 | hostapd + dnsmasq | Provide fallback access point |
 | wifi-autoswitch | Toggles between Wi-Fi client and AP modes |
 | JS8Call | HF digital communications application |
-
+| js8-cli | Use JS8Call's JSON API via the CLI |
 ## 🚀 Quick Install
 
 Set up the complete **Headless JS8Call Pi Node with JS8-CLI** in one line:
@@ -342,6 +342,7 @@ ss -ltnp | grep -E '(:5900|:6080|:80)'
 | Component | Source |
 |------------|---------|
 | JS8Call | [https://js8call.com](https://js8call.com) |
+| @trippnology/js8-cli | [https://classic.yarnpkg.com/en/package/@trippnology/js8-cli](https://classic.yarnpkg.com/en/package/@trippnology/js8-cli) |
 | noVNC / websockify | [https://novnc.com](https://novnc.com) |
 | Openbox / Xvfb / x11vnc | Debian & Raspberry Pi OS packages |
 | Guide Author | Mark Butterworth|
